@@ -42,6 +42,9 @@ struct Command: AsyncParsableCommand {
     @Option(help: "The name of the application to observe.")
     var name: String?
 
+    @Option(help: "The minimum text height fraction to recognize.")
+    var height: Float = RecognizeTextRequest().minimumTextHeightFraction
+
     @Flag(inversion: .prefixedNo, help: "Capture windows and recognize text.")
     var capture: Bool = true
 
@@ -81,7 +84,10 @@ struct Command: AsyncParsableCommand {
 
     func getWindowObservations(window: SCWindow) async throws -> [Observation] {
         let image = try await SCScreenshotManager.captureImage(in: window.frame)
-        let request = RecognizeTextRequest()
+        var request = RecognizeTextRequest()
+
+        request.minimumTextHeightFraction = height
+
         let observations = try await request.perform(on: image)
         var results: [Observation] = []
 
